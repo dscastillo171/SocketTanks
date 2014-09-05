@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SocketTanks</title>
+
+		<!-- Socket.io -->
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+		<!-- Game logic, dynamic. -->
+		<script type="text/javascript" src="/socketTanks/gameConfiguration.js"></script>
+		<script type="text/javascript" src="/socketTanks/gameMap.js"></script>
+
+		<!-- Game logic, static. -->
+		<script type="text/javascript" src="/client/socketTanks/gameObject.js"></script>
+		<script type="text/javascript" src="/client/socketTanks/bullet.js"></script>
+		<script type="text/javascript" src="/client/socketTanks/tank.js"></script>
+		<script type="text/javascript" src="/client/socketTanks/gameBoard.js"></script>
+		<script type="text/javascript" src="/client/client.js"></script>
+	</head>
+	<body style="margin: 0;">
+		<canvas id="GameCanvas" style="position: relative; left: 0px;">
+		</canvas>
+	</body>
+</html>
