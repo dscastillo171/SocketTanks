@@ -53,7 +53,7 @@ app.get('/client/*', function(req, res){
  * Action.
  */
 // Startup server.
-server.listen(8080);
+server.listen(8080, '0.0.0.0');
 console.log("SocketTanks listening on port 8080.");
 
 /*

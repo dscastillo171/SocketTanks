@@ -32,7 +32,7 @@ window.onload = function(){
 	var board = SocketTanks.BoardWithCanvas(canvasObj, SocketTanks.MapStructure, SocketTanks.CONFIG.SCALE);
 
 	// Socket.io
-	var socket = io.connect('http://localhost');
+	var socket = io.connect();
 
 	socket.on('connect', function(){
 		socket.emit('newPlayer', function(playersData){

@@ -288,12 +288,12 @@ var properties = {
 				tank.state = action.tank.state;
 				tank.direction = action.tank.direction;
 				tank.position = action.tank.position;
-			}
 
-			// Add a bullet if necessary.
-			if(action.action === 'fire'){
-				var bullet = {position: tank.position, bulletSender: tank.tankId, direction: tank.direction};
-				bullets.push(bullet);
+				// Add a bullet if necessary.
+				if(action.action === 'fire'){
+					var bullet = {position: tank.position, bulletSender: tank.tankId, direction: tank.direction};
+					bullets.push(bullet);
+				}
 			}
 		}
 	},
