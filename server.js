@@ -59,8 +59,10 @@ console.log("SocketTanks listening on port 8080.");
 /*
  * Socket.io 
  */
+var sockets = {}; 
 io.on('connection', function(socket){
 	var socketId = socket.id;
+	sockets[socketId] = socket;
 
 	socket.on('newPlayer', function(acknowledgement){
 		var playersData = socketTanks.newPlayer(socketId);
@@ -68,18 +70,24 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('clientTankEvent', function(data){
-		socketTanks.playerAction(data);
-		socket.broadcast.emit('serverTankEvent', data);
+		socketTanks.clientTankEvent(data);
 	});
 
 	socket.on('disconnect', function(){
 		socketTanks.playerLeft(socketId);
+		sockets.socketId = null;
 	});
 });
 
 // Server updates.
 socketTanks.onKill(function(data){
 	io.sockets.emit('tankKilled', data);
+
+});
+socketTanks.onPoint(function(data){
+	if(sockets[data]){
+		sockets[data].emit('point');
+	}
 });
 socketTanks.onUpdate(function(data){
 	io.sockets.emit('serverUpdate', data);

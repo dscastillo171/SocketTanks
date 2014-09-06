@@ -46,6 +46,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 	top = top < 0? 0: top;
 	canvas.style.top = top + 'px';
 	var context = canvas.getContext('2d');
+	var stop = false;
 
 	// Setup the map tiles.
 	var tiles = [];
@@ -65,6 +66,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 	var bullets = [];
 	var playerTank = null;
 	var tanks = [];
+	var score = 0;
 
 	// Copy a tank.
 	var copyTank = function(tank){
@@ -92,26 +94,39 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 		},
 
 		"serverUpdates": {
-			value: function(tanksData){
-				tanks = [];
-				for(var i = 0; i < tanksData.length; i++){
-					var tank = this.updateTank(tanksData[i]);
-					if(playerTank && tank.tankId === playerTank.tankId){
-						playerTank = tank;
+			value: function(data){
+				var tanksData = data.tanks;
+				if(tanksData){
+					var newTankList = [];
+					for(var i = 0; i < tanksData.length; i++){
+						var tank = this.updateTank(tanksData[i]);
+						if(playerTank && tank.tankId === playerTank.tankId){
+							playerTank = tank;
+						}
+						newTankList.push(tank.tankId);
+					}
+					for(var i = 0; i < tanks.length; i++){
+						var tank = tanks[i];
+						if(newTankList.indexOf(tank.tankId) < 0){
+							tank.state = 2;
+						}
+					}
+				}
+				var bulletsData = data.bullets;
+				if(bulletsData){
+					for(var i = 0; i < bulletsData.length; i++){
+						this.newBullet(bulletsData[i]);
 					}
 				}
 			}
 		},
 
-		"serverTankEvent": {
-			value: function(actionEvent){
-				if(actionEvent.tank){
-					var tank = this.updateTank(actionEvent.tank);
-					if(actionEvent.action === 'fire'){
-						var bullet = SocketTanks.Bullet(Math.floor(Math.random() * 1000000000), tank.tankId, tank.direction);
-						bullet.position = tank.position;
-						this.updateBullet(bullet);
-					}
+		"newBullet": {
+			value: function(newBullet){
+				if(newBullet && newBullet.bulletSender !== playerTank.tankId){
+					var bullet = SocketTanks.Bullet(Math.floor(Math.random() * 1000000000), newBullet.bulletSender, newBullet.direction);
+					bullet.position = newBullet.position;
+					this.updateBullet(bullet);
 				}
 			}
 		},
@@ -151,11 +166,9 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 		},
 
 		// Reset the game.
-		"reset": {
+		"stop": {
 			value: function(){
-				bullets = [];
-				playerTank = null;
-				tanks = [];
+				stop = true;
 			}
 		},
 
@@ -169,7 +182,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 						break;
 					}
 				}
-
+				
 				// Create or update the bullet.
 				if(bullet){
 					bullet.state = newBullet.state;
@@ -211,6 +224,16 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 			}
 		},
 
+		// Draw the score.
+		"drawScore": {
+			value: function(){
+				var size = 40 * scale;
+				context.font = size + 'px Monaco';
+				context.fillStyle = "white";
+				context.fillText('Score: ' + score, size * 0.5, size * 1.35);
+			}
+		},
+
 		// Draw the board's tiles.
 		"drawTiles": {
 			value: function(){
@@ -239,7 +262,6 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 								bullets[i].state = 1;
 							}
 						}
-
 						bullets[i].draw(context, sprites, SocketTanks.CONFIG.TILE_SIZE, scale);
 						remainingBullets.push(bullets[i]);
 					}
@@ -257,6 +279,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 					var removeTank = tanks[i].update(scale);
 					if(removeTank && playerTank && tanks[i].tankId === playerTank.tankId){
 						playerTank = null;
+						this.stop();
 					} else if(!removeTank){
 						// Check if the tank collided.
 						var currentPosition = tanks[i].position;
@@ -276,9 +299,20 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 			}
 		},
 
+		// The player scored a point.
+		"playerScored": {
+			value: function(){
+				score++;
+			}
+		},
+
 		// Draw the canvas at each passing frame.
 		"start": {
 		value: function(eventCallback){
+				if(stop){
+					return false;
+				}
+
 				var self = this;
 
 				// Controlls.
@@ -346,7 +380,10 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 					self.drawTiles();
 					self.drawBullets();
 					self.drawTanks();
+					self.drawScore();
 				}, 1000 / SocketTanks.CONFIG.FPS);
+
+				return true;
 			}
 		},
 	}

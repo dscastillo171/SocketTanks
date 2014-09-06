@@ -35,14 +35,18 @@ window.onload = function(){
 	var socket = io.connect();
 
 	socket.on('connect', function(){
-		socket.emit('newPlayer', function(playersData){
-			board.createPlayer(playersData);
+		// Start the game.
+		var started = board.start(function(tankEvent){
+			socket.emit('clientTankEvent', tankEvent);
 		});
-	});
 
-	socket.on('serverTankEvent', function(data){
-		board.serverTankEvent(data);
-	});	
+		// Create the player.
+		if(started){
+			socket.emit('newPlayer', function(playersData){
+				board.createPlayer(playersData);
+			});
+		}
+	});
 
 	socket.on('serverUpdate', function(data){
 		board.serverUpdates(data);
@@ -52,12 +56,11 @@ window.onload = function(){
 		board.killedTank(data);
 	});
 
-	socket.on('disconnect', function(){
-		board.reset();
+	socket.on('point', function(){
+		board.playerScored();
 	});
 
-	// Start the game.
-	board.start(function(tankEvent){
-		socket.emit('clientTankEvent', tankEvent);
+	socket.on('disconnect', function(){
+		board.stop();
 	});
 };

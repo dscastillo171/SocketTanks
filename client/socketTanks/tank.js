@@ -162,14 +162,14 @@ SocketTanks.Tank = function(tankId){
 				context.rotate(angle);
 				context.drawImage(image, // Sprite sheet.
 					sprite.x * sourceSize, (isPlayer? sprite.y: sprite.y + 1) * sourceSize, sourceSize, sourceSize, // Source.
-					xCoord * scale, yCoord * scale, sourceSize * scale, sourceSize * scale); // Destination.
+					Math.floor(xCoord * scale), Math.floor(yCoord * scale), Math.floor(sourceSize * scale), Math.floor(sourceSize * scale)); // Destination.
 				context.restore();
 
 				// Draw the explosion.
 				if(this.state === 2){
 					context.drawImage(image, // Sprite sheet.
 						explosionSprite.x * sourceSize, explosionSprite.y * sourceSize, sourceSize, sourceSize, // Source.
-						this.position.x * scale, this.position.y * scale, sourceSize * scale, sourceSize * scale); // Destination.
+						Math.floor(this.position.x * scale), Math.floor(this.position.y * scale), Math.floor(sourceSize * scale), Math.floor(sourceSize * scale)); // Destination.
 					context.restore;
 				}
 			}

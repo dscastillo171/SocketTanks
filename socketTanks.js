@@ -55,13 +55,13 @@ CONFIG.SCALE = 0.75; // 1.0, 0.75, 0.5, 0.25
 var mapStructure = [
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	[1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1],
-	[1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
-	[1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-	[1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
-	[1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-	[1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
-	[1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 	[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
@@ -71,6 +71,7 @@ var tanks = [];
 var bullets = [];
 var onKillFuncion = null;
 var onPositionUpdateFunction = null;
+var onPointFunction = null;
 
 // Write the configurations common to all clients. 
 var generateConfigurationFile = function(){
@@ -258,7 +259,7 @@ var properties = {
 		var tank = newTank(tankId);
 		tanks.push(tank);
 		if(onPositionUpdateFunction){
-			onPositionUpdateFunction(tanks);
+			onPositionUpdateFunction({tanks: tanks});
 		}
 		return {playerId: tank.tankId, players: tanks};
 	},
@@ -267,12 +268,12 @@ var properties = {
 	playerLeft: function(tankId){
 		removeTank(tankId);
 		if(onPositionUpdateFunction){
-			onPositionUpdateFunction(tanks);
+			onPositionUpdateFunction({tanks: tanks});
 		}
 	},
 
 	// A player sent and action.
-	playerAction: function(action){
+	clientTankEvent: function(action){
 		if(action.tank){
 			// Search for the tank.
 			var tank;
@@ -284,6 +285,7 @@ var properties = {
 			}
 			
 			// Update the tank.
+			var newBullets = [];
 			if(tank){
 				tank.state = action.tank.state;
 				tank.direction = action.tank.direction;
@@ -293,7 +295,12 @@ var properties = {
 				if(action.action === 'fire'){
 					var bullet = {position: tank.position, bulletSender: tank.tankId, direction: tank.direction};
 					bullets.push(bullet);
+					newBullets.push(bullet);
 				}
+			}
+
+			if(onPositionUpdateFunction){
+				onPositionUpdateFunction({tanks: tanks, bullets: newBullets});
 			}
 		}
 	},
@@ -309,6 +316,12 @@ var properties = {
 		if(typeof(callback) === 'function'){
 			onPositionUpdateFunction = callback;
 		}
+	},
+
+	onPoint: function(callback){
+		if(typeof(callback) === 'function'){
+			onPointFunction = callback;
+		}
 	}
 };
 
@@ -318,6 +331,7 @@ module.exports = function(){
 	setInterval(function(){
 		// Check the bullets.
 		var killedTanks = [];
+		var killers = [];
 		var remainingBullets = [];
 		for(var i = 0; i < bullets.length; i++){
 			var previousPosition = {x: bullets[i].position.x, y: bullets[i].position.y};
@@ -330,6 +344,7 @@ module.exports = function(){
 			if(tileCollision || killedTank){
 				if(killedTank){
 					killedTanks.push(killedTank);
+					killers.push(bullets[i].bulletSender);
 				}
 			} else{
 				remainingBullets.push(bullets[i]);
@@ -369,18 +384,16 @@ module.exports = function(){
 		tanks = remainingTanks;
 		
 		// Inform the clients about the killed tanks.
-		if(killedTanks.length){
+		if(killedTanks.length || killers.length){
 			for(var i = 0; i < killedTanks.length; i++){
 				if(onKillFuncion){
 					onKillFuncion(killedTanks[i]);
 				}
 			}
-
-			// Update positions.
-			if(onPositionUpdateFunction){
-				setTimeout(function(){
-					onPositionUpdateFunction(tanks);
-				}, 1000)
+			for(var i = 0; i < killers.length; i++){
+				if(onPointFunction){
+					onPointFunction(killers[i]);
+				}
 			}
 		}
 	}, 1000 / CONFIG.FPS);

@@ -66,7 +66,7 @@ SocketTanks.ObjectWithSprite = function(spriteCoordX, spriteCoordY){
 		"draw": {
 			value: function(context, image, sourceSize, scale){
 				context.drawImage(image, // Sprite sheet.
-					Math.floor(spriteCoords.x * sourceSize), Math.floor(spriteCoords.y * sourceSize), Math.floor(sourceSize), Math.floor(sourceSize), // Source.
+					spriteCoords.x * sourceSize, spriteCoords.y * sourceSize, sourceSize, sourceSize, // Source.
 					Math.floor(position.x * scale), Math.floor(position.y * scale), Math.floor(sourceSize * scale), Math.floor(sourceSize * scale)); // Destination.
 			}
 		}
