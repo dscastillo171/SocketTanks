@@ -28,6 +28,7 @@
 // Set up app.
 var app = require('express')();
 var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 // Set up the game logic.
 var socketTanks = require('./socketTanks')();
@@ -58,3 +59,36 @@ console.log("SocketTanks listening on port 8080.");
 /*
  * Socket.io 
  */
+var sockets = {}; 
+io.on('connection', function(socket){
+	var socketId = socket.id;
+	sockets[socketId] = socket;
+
+	socket.on('newPlayer', function(acknowledgement){
+		var playersData = socketTanks.newPlayer(socketId);
+		acknowledgement(playersData);
+	});
+
+	socket.on('clientTankEvent', function(data){
+		socketTanks.clientTankEvent(data);
+	});
+
+	socket.on('disconnect', function(){
+		socketTanks.playerLeft(socketId);
+		sockets.socketId = null;
+	});
+});
+
+// Server updates.
+socketTanks.onKill(function(data){
+	io.sockets.emit('tankKilled', data);
+
+});
+socketTanks.onPoint(function(data){
+	if(sockets[data]){
+		sockets[data].emit('point');
+	}
+});
+socketTanks.onUpdate(function(data){
+	io.sockets.emit('serverUpdate', data);
+})

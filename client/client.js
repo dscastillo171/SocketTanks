@@ -31,8 +31,36 @@ window.onload = function(){
 	var canvasObj = document.getElementById('GameCanvas');
 	var board = SocketTanks.BoardWithCanvas(canvasObj, SocketTanks.MapStructure, SocketTanks.CONFIG.SCALE);
 
-	/*
-	 * Socket.io 
-	 */
-	
+	// Socket.io
+	var socket = io.connect();
+
+	socket.on('connect', function(){
+		// Start the game.
+		var started = board.start(function(tankEvent){
+			socket.emit('clientTankEvent', tankEvent);
+		});
+
+		// Create the player.
+		if(started){
+			socket.emit('newPlayer', function(playersData){
+				board.createPlayer(playersData);
+			});
+		}
+	});
+
+	socket.on('serverUpdate', function(data){
+		board.serverUpdates(data);
+	});
+
+	socket.on('tankKilled', function(data){
+		board.killedTank(data);
+	});
+
+	socket.on('point', function(){
+		board.playerScored();
+	});
+
+	socket.on('disconnect', function(){
+		board.stop();
+	});
 };
