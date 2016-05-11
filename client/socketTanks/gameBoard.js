@@ -138,23 +138,6 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 			}
 		},
 
-		"startPlayerMovement": {
-			value: function(direction){
-				if(playerTank){
-					playerTank.state = 1;
-					playerTank.direction = direction;
-				}
-			}
-		},
-
-		"stopPlayerMovement": {
-			value: function(){
-				if(playerTank){
-					playerTank.state = 0;
-				}
-			}
-		},
-
 		"playerFired": {
 			value: function(){
 				if(playerTank){
@@ -212,7 +195,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				tank.state = newTank.state;
 				tank.direction = newTank.direction;
 				tank.position = newTank.position;
-
+				
 				return tank;
 			}
 		},
@@ -336,10 +319,13 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				    }
 				    if(direction){
 				    	if(movement.indexOf(direction) < 0){
-				    		self.startPlayerMovement(direction);
 					    	movement.push(direction);
 					    	if(eventCallback && playerTank && typeof(eventCallback) === 'function'){
-					    		eventCallback({tank: copyTank(playerTank), action: 'movement:' + playerTank.direction});
+					    		eventCallback({tank: {
+					    			tankId: playerTank.tankId,
+										direction: direction,
+										state: 1
+									}, action: 'movement:' + direction});
 					    	}
 					    }
 				    }
@@ -360,14 +346,19 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				    	if(index >= 0){
 				    		movement.splice(index, 1);
 				    		if(movement.length > 0){
-				    			self.startPlayerMovement(movement[movement.length - 1]);
 				    			if(eventCallback && playerTank && typeof(eventCallback) === 'function'){
-						    		eventCallback({tank: copyTank(playerTank), action: 'movement:' + playerTank.direction});
+						    		eventCallback({tank: {
+						    			tankId: playerTank.tankId,
+											direction: movement[movement.length - 1],
+											state: 1
+										}, action: 'movement:' + movement[movement.length - 1]});
 						    	}
 				    		} else{
-				    			self.stopPlayerMovement();
 				    			if(eventCallback && playerTank && typeof(eventCallback) === 'function'){
-						    		eventCallback({tank: copyTank(playerTank), action: 'stop'});
+						    		eventCallback({tank: {
+						    			tankId: playerTank.tankId,
+											state: 0
+										}, action: 'stop'});
 						    	}
 				    		}
 				    	}

@@ -289,7 +289,6 @@ var properties = {
 			if(tank){
 				tank.state = action.tank.state;
 				tank.direction = action.tank.direction;
-				tank.position = action.tank.position;
 
 				// Add a bullet if necessary.
 				if(action.action === 'fire'){

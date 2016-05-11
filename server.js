@@ -90,5 +90,7 @@ socketTanks.onPoint(function(data){
 	}
 });
 socketTanks.onUpdate(function(data){
-	io.sockets.emit('serverUpdate', data);
+	setTimeout(function() {
+		io.sockets.emit('serverUpdate', data);
+	}, 0);
 })
