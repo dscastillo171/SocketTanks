@@ -92,5 +92,5 @@ socketTanks.onPoint(function(data){
 socketTanks.onUpdate(function(data){
 	setTimeout(function() {
 		io.sockets.emit('serverUpdate', data);
-	}, Math.ceil(Math.random() * 500));
+	}, Math.ceil(Math.random() * 450) + 50);
 })
