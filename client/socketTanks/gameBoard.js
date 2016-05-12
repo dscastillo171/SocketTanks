@@ -196,12 +196,6 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 					tank = SocketTanks.Tank(newTank.tankId);
 					tanks.push(tank);
 				}
-<<<<<<< HEAD
-				tank.state = newTank.state;
-				tank.direction = newTank.direction;
-				tank.position = newTank.position;
-				
-=======
 
 				if(tank){
 					if(!positionOnly){
@@ -210,8 +204,6 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 					}
 					tank.position = newTank.position;
 				}
-
->>>>>>> master
 				return tank;
 			}
 		},
