@@ -28,6 +28,8 @@
 var CONFIG = {};
 // Rendering frames per second.
 CONFIG.FPS = 30;
+// Update rate.
+CONFIG.UPDATE_RATE = 30;
 // Tile size, in pixels.
 CONFIG.TILE_SIZE = 84;
 // Speed of bullets, pixels per frame.
@@ -289,7 +291,6 @@ var properties = {
 			if(tank){
 				tank.state = action.tank.state;
 				tank.direction = action.tank.direction;
-				tank.position = action.tank.position;
 
 				// Add a bullet if necessary.
 				if(action.action === 'fire'){
@@ -397,6 +398,13 @@ module.exports = function(){
 			}
 		}
 	}, 1000 / CONFIG.FPS);
+
+	// Game loop.
+	setInterval(function(){
+		if(onPositionUpdateFunction){
+			onPositionUpdateFunction({tanks: tanks, positionOnly: true});
+		}
+	}, 1000 / CONFIG.UPDATE_RATE);
 
 	return properties;
 };
