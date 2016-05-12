@@ -90,7 +90,14 @@ socketTanks.onPoint(function(data){
 	}
 });
 socketTanks.onUpdate(function(data){
+<<<<<<< HEAD
 	setTimeout(function() {
 		io.sockets.emit('serverUpdate', data);
 	}, 0);
+=======
+	data.time = (new Date()).getTime();
+	setTimeout(function() {
+		io.sockets.emit('serverUpdate', data);
+	}, Math.ceil(Math.random() * 500));
+>>>>>>> master
 })

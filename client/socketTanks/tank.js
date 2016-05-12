@@ -92,7 +92,7 @@ SocketTanks.Tank = function(tankId){
 		* Returns true if the tank should be removed from the board.
 		*/
 		"update": {
-			value: function(scale){
+			value: function(scale, extrapolate){
 				var removeTank;
 				if(this.state === 1){
 					// Calculate the current sprite.
@@ -106,7 +106,9 @@ SocketTanks.Tank = function(tankId){
 					}
 
 					// Update the tank's position.
-					this.position = SocketTanks.util.updatePosition(this.position, this.direction, SocketTanks.CONFIG.TANK_SPEED, scale);
+					if(extrapolate){
+						this.position = SocketTanks.util.updatePosition(this.position, this.direction, SocketTanks.CONFIG.TANK_SPEED, scale);
+					}
 
 					removeTank = false;
 				} else if(this.state === 2){

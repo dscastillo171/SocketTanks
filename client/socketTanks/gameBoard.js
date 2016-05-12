@@ -99,16 +99,20 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				if(tanksData){
 					var newTankList = [];
 					for(var i = 0; i < tanksData.length; i++){
-						var tank = this.updateTank(tanksData[i]);
-						if(playerTank && tank.tankId === playerTank.tankId){
+						var tank = this.updateTank(tanksData[i], data.positionOnly);
+						if(playerTank && tank && tank.tankId === playerTank.tankId){
 							playerTank = tank;
 						}
-						newTankList.push(tank.tankId);
+						if(tank){
+							newTankList.push(tank.tankId);
+						}
 					}
-					for(var i = 0; i < tanks.length; i++){
-						var tank = tanks[i];
-						if(newTankList.indexOf(tank.tankId) < 0){
-							tank.state = 2;
+					if(!data.positionOnly){
+						for(var i = 0; i < tanks.length; i++){
+							var tank = tanks[i];
+							if(newTankList.indexOf(tank.tankId) < 0){
+								tank.state = 2;
+							}
 						}
 					}
 				}
@@ -178,7 +182,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 
 		// Update a tank.
 		"updateTank": {
-			value: function(newTank){
+			value: function(newTank, positionOnly){
 				var tank;
 				for(var i = 0; i < tanks.length; i++){
 					if(tanks[i].tankId === newTank.tankId){
@@ -188,14 +192,26 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				}
 				
 				// Create or update the tank.
-				if(!tank){
+				if(!tank && !positionOnly){
 					tank = SocketTanks.Tank(newTank.tankId);
 					tanks.push(tank);
 				}
+<<<<<<< HEAD
 				tank.state = newTank.state;
 				tank.direction = newTank.direction;
 				tank.position = newTank.position;
 				
+=======
+
+				if(tank){
+					if(!positionOnly){
+						tank.state = newTank.state;
+						tank.direction = newTank.direction;
+					}
+					tank.position = newTank.position;
+				}
+
+>>>>>>> master
 				return tank;
 			}
 		},
@@ -259,7 +275,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				var remainingTanks = [];
 				for(var i = 0; i < tanks.length; i++){
 					var previousPosition = {x: tanks[i].position.x, y: tanks[i].position.y};
-					var removeTank = tanks[i].update(scale);
+					var removeTank = tanks[i].update(scale, true);
 					if(removeTank && playerTank && tanks[i].tankId === playerTank.tankId){
 						playerTank = null;
 						this.stop();
