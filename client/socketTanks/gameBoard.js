@@ -285,7 +285,7 @@ SocketTanks.BoardWithCanvas = function(canvasObj, mapData, scale){
 				var remainingTanks = [];
 				for(var i = 0; i < tanks.length; i++){
 					var previousPosition = {x: tanks[i].position.x, y: tanks[i].position.y};
-					var removeTank = tanks[i].update(scale, true);
+					var removeTank = tanks[i].update(scale, playerTank && playerTank.tankId === tanks[i].tankId);
 					if(removeTank && playerTank && tanks[i].tankId === playerTank.tankId){
 						playerTank = null;
 						this.stop();
